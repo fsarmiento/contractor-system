@@ -1,0 +1,33 @@
+include ':common'
+include ':api:app'
+include ':web'
+
+rootProject.name = 'contractor-system'
+
+setBuildFilename(rootProject, null)
+
+def setBuildFilename(project, prefix) {
+  project.children.each { subProject ->
+    String fileBasename = null; 
+
+    if (prefix != null) {
+      fileBasename = prefix + "." + subProject.name
+    }else {
+      fileBasename = subProject.name
+    }
+    
+    fileBasename = fileBasename.replaceAll("\\p{Upper}") { "-${it.toLowerCase()}" }
+    subProject.buildFileName = "${fileBasename}.gradle"
+
+    if (!subProject.buildFile.isFile()) {
+      subProject.buildFileName = "build.gradle"
+    }
+
+    if (subProject.buildFile.isFile()) {
+      println "Found build file $subProject.buildFileName for sub-project $fileBasename"
+    }
+
+    assert subProject.projectDir.isDirectory()
+    setBuildFilename(subProject, fileBasename)
+  }
+}
